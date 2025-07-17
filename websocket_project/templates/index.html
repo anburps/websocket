@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Two-User Chat</title>
+</head>
+<body>
+    <h2>Chat with user: <span id="roomName"></span></h2>
+    <input type="text" id="username" placeholder="Enter your name" /><br><br>
+    <input type="text" id="messageInput" placeholder="Enter message" />
+    <button onclick="sendMessage()">Send</button>
+
+    <ul id="chatLog"></ul>
+
+    <script>
+        const roomName = prompt("Enter room name (e.g. user1_user2): ");
+        document.getElementById('roomName').innerText = roomName;
+
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+        );
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const message = data.username + ": " + data.message;
+            document.getElementById('chatLog').innerHTML += `<li>${message}</li>`;
+        };
+
+        function sendMessage() {
+            const username = document.getElementById('username').value;
+            const message = document.getElementById('messageInput').value;
+            chatSocket.send(JSON.stringify({
+                'username': username,
+                'message': message
+            }));
+            document.getElementById('messageInput').value = '';
+        }
+    </script>
+</body>
+</html>
